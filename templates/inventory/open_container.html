@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Open container · LabStock{% endblock %}
+{% block page_title %}Open a container{% endblock %}
+{% block page_meta %}<div class="meta">Moves sealed quantity into an individually tracked bottle with its own effective expiry.</div>{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="body">
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+      {% for field in form %}
+      <label>
+        {{ field.label }}
+        {{ field }}
+        {% if field.help_text %}<span class="help">{{ field.help_text }}</span>{% endif %}
+        {{ field.errors }}
+      </label>
+      {% endfor %}
+      <div class="btn-row">
+        <button class="btn" type="submit">Open container</button>
+        <a class="btn secondary" href="{% url 'opened_list' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Receive stock · LabStock{% endblock %}
+{% block page_title %}Receive stock{% endblock %}
+{% block page_meta %}<div class="meta">One form — item, lot, location, quantity, manufacturer expiry.</div>{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="body">
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+      {% for field in form %}
+      <label>
+        {{ field.label }}
+        {{ field }}
+        {% if field.help_text %}<span class="help">{{ field.help_text }}</span>{% endif %}
+        {{ field.errors }}
+      </label>
+      {% endfor %}
+      <div class="btn-row">
+        <button class="btn" type="submit">Record receipt</button>
+        <a class="btn secondary" href="{% url 'dashboard' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}LabStock{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">Lab<span>Stock</span></div>
+    {% if current_organization %}
+    <div class="org-chip">
+      <strong>{{ current_organization.name }}</strong>
+      {% if current_membership %}{{ current_membership.get_role_display }}{% endif %}
+    </div>
+    {% endif %}
+    <nav class="nav">
+      <div class="section-label">Overview</div>
+      <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+      <a href="{% url 'item_list' %}" class="{% if request.resolver_match.url_name == 'item_list' or request.resolver_match.url_name == 'item_detail' %}active{% endif %}">Items</a>
+      <a href="{% url 'location_list' %}" class="{% if request.resolver_match.url_name == 'location_list' %}active{% endif %}">Locations</a>
+      <a href="{% url 'lot_list' %}" class="{% if request.resolver_match.url_name == 'lot_list' %}active{% endif %}">Lots</a>
+      <a href="{% url 'opened_list' %}" class="{% if request.resolver_match.url_name == 'opened_list' %}active{% endif %}">Opened containers</a>
+      <div class="section-label">Daily use</div>
+      <a href="{% url 'receive' %}" class="{% if request.resolver_match.url_name == 'receive' %}active{% endif %}">Receive stock</a>
+      <a href="{% url 'issue' %}" class="{% if request.resolver_match.url_name == 'issue' %}active{% endif %}">Issue / use</a>
+      <a href="{% url 'open_container' %}" class="{% if request.resolver_match.url_name == 'open_container' %}active{% endif %}">Open container</a>
+      <a href="{% url 'adjust' %}" class="{% if request.resolver_match.url_name == 'adjust' %}active{% endif %}">Adjust</a>
+      <a href="{% url 'count_list' %}" class="{% if 'count' in request.resolver_match.url_name %}active{% endif %}">Stock counts</a>
+      <div class="section-label">Review</div>
+      <a href="{% url 'movement_list' %}" class="{% if request.resolver_match.url_name == 'movement_list' %}active{% endif %}">Movement ledger</a>
+      <a href="{% url 'reports' %}" class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}">Reports</a>
+      <a href="{% url 'settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}">Settings</a>
+    </nav>
+    <div class="sidebar-foot">
+      {{ user.get_full_name|default:user.username }}
+      <form method="post" action="{% url 'logout' %}" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="btn ghost" style="padding:0;color:#5eead4;border:0;background:none;font:inherit;cursor:pointer">Sign out</button>
+      </form>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+        {% block page_meta %}<div class="meta">Know what you have, what expires, what to reorder.</div>{% endblock %}
+      </div>
+      <div class="btn-row">
+        {% block top_actions %}{% endblock %}
+      </div>
+    </header>
+    <main class="content">
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% else %}
+  {% block unauth %}{% endblock %}
+{% endif %}
+</body>
+</html>

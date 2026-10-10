@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · LabStock{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block top_actions %}
+  <a class="btn secondary" href="{% url 'receive' %}">Receive</a>
+  <a class="btn" href="{% url 'issue' %}">Issue stock</a>
+{% endblock %}
+{% block content %}
+<section class="grid stats">
+  <div class="stat">
+    <div class="label">Active items</div>
+    <div class="value">{{ item_count }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Active lots</div>
+    <div class="value">{{ lot_count }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Opened containers</div>
+    <div class="value">{{ opened_count }}</div>
+  </div>
+  <div class="stat {% if reorder_items %}warn{% endif %}">
+    <div class="label">Below minimum</div>
+    <div class="value">{{ reorder_items|length }}</div>
+  </div>
+</section>
+
+<div class="grid two" style="margin-top:1rem">
+  <section class="panel">
+    <header>
+      <h2>Expiry warnings ({{ warn_days }} days)</h2>
+      {% if expired_count %}<span class="badge danger">{{ expired_count }} expired</span>{% endif %}
+    </header>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Source</th><th>Location</th><th>Qty</th><th>Expires</th></tr>
+        </thead>
+        <tbody>
+          {% for lot in expiring_lots %}
+          <tr>
+            <td>{{ lot.item.name }}</td>
+            <td>Lot {{ lot.lot_number }}</td>
+            <td>{{ lot.location.name }}</td>
+            <td>{{ lot.quantity_on_hand }} {{ lot.item.unit }}</td>
+            <td>
+              {{ lot.manufacturer_expiry }}
+              {% if lot.manufacturer_expiry < today %}
+                <span class="badge danger">expired</span>
+              {% else %}
+                <span class="badge warn">{{ lot.days_until_expiry }}d</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          {% for c in expiring_opened %}
+          <tr>
+            <td>{{ c.item.name }}</td>
+            <td>Opened · {{ c.container_label }}</td>
+            <td>{{ c.location.name }}</td>
+            <td>{{ c.quantity_remaining }} {{ c.item.unit }}</td>
+            <td>
+              {{ c.effective_expiry }}
+              {% if c.effective_expiry < today %}
+                <span class="badge danger">expired</span>
+              {% else %}
+                <span class="badge warn">{{ c.days_until_expiry }}d</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not expiring_lots and not expiring_opened %}
+          <tr><td colspan="5" class="empty">No approaching expiries. Nice work.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <header>
+      <h2>Reorder alerts</h2>
+      <a href="{% url 'reports' %}">View report</a>
+    </header>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Item</th><th>On hand</th><th>Minimum</th></tr>
+        </thead>
+        <tbody>
+          {% for item in reorder_items %}
+          <tr>
+            <td><a href="{% url 'item_detail' item.pk %}">{{ item.name }}</a></td>
+            <td>{{ item.on_hand_quantity }} {{ item.unit }}</td>
+            <td>{{ item.minimum_level }} {{ item.unit }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="empty">All items are at or above minimum.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<section class="panel" style="margin-top:1rem">
+  <header>
+    <h2>Recent movements</h2>
+    <a href="{% url 'movement_list' %}">Full ledger</a>
+  </header>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>When</th><th>Type</th><th>Item</th><th>Qty</th><th>Reason</th><th>By</th></tr>
+      </thead>
+      <tbody>
+        {% for m in recent_movements %}
+        <tr>
+          <td>{{ m.occurred_at|date:"Y-m-d H:i" }}</td>
+          <td><span class="badge">{{ m.get_movement_type_display }}</span></td>
+          <td>{{ m.item.name }}</td>
+          <td>{% if m.quantity > 0 %}+{% endif %}{{ m.quantity }}</td>
+          <td>{{ m.reason }}</td>
+          <td>{{ m.performed_by|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="empty">No movements yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

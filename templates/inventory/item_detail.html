@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ item.name }} · LabStock{% endblock %}
+{% block page_title %}{{ item.name }}{% endblock %}
+{% block page_meta %}
+<div class="meta">{{ item.get_category_display }} · {{ on_hand }} {{ item.unit }} on hand · min {{ item.minimum_level }}</div>
+{% endblock %}
+{% block top_actions %}
+  <a class="btn secondary" href="{% url 'receive' %}">Receive</a>
+  <a class="btn" href="{% url 'issue' %}">Issue</a>
+{% endblock %}
+{% block content %}
+<div class="grid two">
+  <section class="panel">
+    <header><h2>Sealed lots</h2></header>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Lot</th><th>Location</th><th>Qty</th><th>Expiry</th></tr></thead>
+        <tbody>
+          {% for lot in lots %}
+          <tr>
+            <td>{{ lot.lot_number }}</td>
+            <td>{{ lot.location }}</td>
+            <td>{{ lot.quantity_on_hand }}</td>
+            <td>{{ lot.manufacturer_expiry }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="empty">No sealed stock.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="panel">
+    <header><h2>Opened containers</h2></header>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Label</th><th>Lot</th><th>Qty</th><th>Effective expiry</th><th>Rule</th></tr></thead>
+        <tbody>
+          {% for c in opened %}
+          <tr>
+            <td>{{ c.container_label }}</td>
+            <td>{{ c.lot.lot_number }}</td>
+            <td>{{ c.quantity_remaining }}</td>
+            <td>{{ c.effective_expiry }}</td>
+            <td>{{ c.expiry_rule_days }}d · {{ c.expiry_rule_source }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="empty">No opened containers.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+<section class="panel" style="margin-top:1rem">
+  <header><h2>Stock card (recent ledger)</h2></header>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>When</th><th>Type</th><th>Qty</th><th>Reason</th><th>By</th></tr></thead>
+      <tbody>
+        {% for m in movements %}
+        <tr>
+          <td>{{ m.occurred_at|date:"Y-m-d H:i" }}</td>
+          <td>{{ m.get_movement_type_display }}</td>
+          <td>{% if m.quantity > 0 %}+{% endif %}{{ m.quantity }}</td>
+          <td>{{ m.reason }}</td>
+          <td>{{ m.performed_by|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="empty">No movements.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

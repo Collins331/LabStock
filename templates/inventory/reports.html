@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Reports · LabStock{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block page_meta %}<div class="meta">Usage, wastage, and purchasing needs since {{ month_start }}.</div>{% endblock %}
+{% block content %}
+<div class="grid two">
+  <section class="panel">
+    <header><h2>Usage (issues) this month</h2></header>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Item</th><th>Issued</th></tr></thead>
+        <tbody>
+          {% for row in usage %}
+          <tr>
+            <td>{{ row.name }}</td>
+            <td>{{ row.total }} {{ row.unit }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="2" class="empty">No issues recorded this month.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="panel">
+    <header><h2>Wastage (disposals) this month</h2></header>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Item</th><th>Disposed</th></tr></thead>
+        <tbody>
+          {% for row in wastage %}
+          <tr>
+            <td>{{ row.name }}</td>
+            <td>{{ row.total }} {{ row.unit }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="2" class="empty">No disposals this month.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+<section class="panel" style="margin-top:1rem">
+  <header><h2>Purchasing needs (below minimum)</h2></header>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Item</th><th>On hand</th><th>Minimum</th><th>Gap</th><th>Preferred supplier</th></tr></thead>
+      <tbody>
+        {% for row in reorder %}
+        <tr>
+          <td>{{ row.item.name }}</td>
+          <td>{{ row.on_hand }} {{ row.item.unit }}</td>
+          <td>{{ row.item.minimum_level }}</td>
+          <td>{{ row.gap }} <span class="badge warn">reorder</span></td>
+          <td>{{ row.item.preferred_supplier|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="empty">Nothing below minimum.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

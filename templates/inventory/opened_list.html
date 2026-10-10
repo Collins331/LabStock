@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Opened containers · LabStock{% endblock %}
+{% block page_title %}Opened containers{% endblock %}
+{% block page_meta %}<div class="meta">Tracked individually when opening changes the expiry. Rule + source stored on each container.</div>{% endblock %}
+{% block top_actions %}
+  <a class="btn" href="{% url 'open_container' %}">Open a container</a>
+{% endblock %}
+{% block content %}
+<div class="filters">
+  <a class="btn {% if show == 'active' %}{% else %}secondary{% endif %}" href="?show=active">Active</a>
+  <a class="btn {% if show == 'all' %}{% else %}secondary{% endif %}" href="?show=all">All</a>
+</div>
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th><th>Label</th><th>Lot</th><th>Location</th><th>Opened</th>
+          <th>Qty left</th><th>Effective expiry</th><th>Rule / source</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in containers %}
+        <tr>
+          <td><a href="{% url 'item_detail' c.item_id %}">{{ c.item.name }}</a></td>
+          <td>{{ c.container_label }}</td>
+          <td>{{ c.lot.lot_number }}</td>
+          <td>{{ c.location }}</td>
+          <td>{{ c.opened_on }}</td>
+          <td>{{ c.quantity_remaining }} {{ c.item.unit }}</td>
+          <td>
+            {{ c.effective_expiry }}
+            {% if c.effective_expiry < today %}
+              <span class="badge danger">expired</span>
+            {% elif c.days_until_expiry <= current_organization.expiry_warning_days %}
+              <span class="badge warn">{{ c.days_until_expiry }}d</span>
+            {% endif %}
+          </td>
+          <td>
+            {{ c.expiry_rule_days }} days after opening
+            <div class="muted">{{ c.expiry_rule_source }}</div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="empty">No opened containers.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Count {{ count.counted_on }} · LabStock{% endblock %}
+{% block page_title %}Count · {{ count.location }}{% endblock %}
+{% block page_meta %}
+<div class="meta">{{ count.counted_on }} ·
+  {% if count.status == 'posted' %}Posted {{ count.posted_at|date:"Y-m-d H:i" }}{% else %}Draft — enter physical quantities{% endif %}
+</div>
+{% endblock %}
+{% block content %}
+<section class="panel">
+  <form method="post">
+    {% csrf_token %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th><th>Lot</th><th>System</th><th>Counted</th><th>Variance</th><th>Reason if different</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for line in lines %}
+          <tr>
+            <td>{{ line.item.name }}</td>
+            <td>{{ line.lot.lot_number|default:"—" }}</td>
+            <td>{{ line.system_quantity }} {{ line.item.unit }}</td>
+            <td>
+              {% if count.status == 'draft' %}
+              <input class="input" style="max-width:110px" type="number" step="0.01" name="qty_{{ line.pk }}" value="{{ line.counted_quantity }}">
+              {% else %}
+              {{ line.counted_quantity }}
+              {% endif %}
+            </td>
+            <td>
+              {% with v=line.variance %}
+                {% if v %}
+                  <span class="badge {% if v < 0 %}danger{% else %}ok{% endif %}">{% if v > 0 %}+{% endif %}{{ v }}</span>
+                {% else %}
+                  <span class="muted">0</span>
+                {% endif %}
+              {% endwith %}
+            </td>
+            <td>
+              {% if count.status == 'draft' %}
+              <input class="input" name="reason_{{ line.pk }}" value="{{ line.variance_reason }}" placeholder="Required if variance">
+              {% else %}
+              {{ line.variance_reason|default:"—" }}
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="empty">No lines — location may have had no stock.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if count.status == 'draft' %}
+    <div class="body btn-row">
+      <button class="btn secondary" type="submit" name="save" value="1">Save draft</button>
+      <button class="btn" type="submit" name="post" value="1">Post adjustments to ledger</button>
+    </div>
+    {% endif %}
+  </form>
+</section>
+{% endblock %}

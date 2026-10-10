@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Items · LabStock{% endblock %}
+{% block page_title %}Items{% endblock %}
+{% block page_meta %}<div class="meta">Reagents, controls, calibrators, and consumables.</div>{% endblock %}
+{% block content %}
+<form class="filters" method="get">
+  <input class="input" style="max-width:280px" type="search" name="q" value="{{ q }}" placeholder="Search name or SKU">
+  <button class="btn secondary" type="submit">Search</button>
+  <a class="btn ghost" href="{% url 'location_list' %}">Stock locations ({{ locations|length }})</a>
+</form>
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th><th>Category</th><th>On hand</th><th>Minimum</th>
+          <th>Location</th><th>Open rule</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>
+            <a href="{% url 'item_detail' row.item.pk %}"><strong>{{ row.item.name }}</strong></a>
+            {% if row.item.sku %}<div class="muted">{{ row.item.sku }}</div>{% endif %}
+          </td>
+          <td>{{ row.item.get_category_display }}</td>
+          <td>
+            {{ row.on_hand }} {{ row.item.unit }}
+            {% if row.below_min %}<span class="badge warn">reorder</span>{% endif %}
+          </td>
+          <td>{{ row.item.minimum_level }}</td>
+          <td>{{ row.item.default_location|default:"—" }}</td>
+          <td>
+            {% if row.item.open_expiry_days %}
+              {{ row.item.open_expiry_days }}d
+              <div class="muted">{{ row.item.open_expiry_rule_source }}</div>
+            {% else %}—{% endif %}
+          </td>
+          <td><a href="{% url 'item_detail' row.item.pk %}">Open</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="empty">No items found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}New stock count · LabStock{% endblock %}
+{% block page_title %}New stock count{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="body">
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+      {% for field in form %}
+      <label>{{ field.label }} {{ field }}{{ field.errors }}</label>
+      {% endfor %}
+      <div class="btn-row">
+        <button class="btn" type="submit">Create count sheet</button>
+        <a class="btn secondary" href="{% url 'count_list' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

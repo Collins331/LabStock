@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Sign in · LabStock{% endblock %}
+{% block unauth %}
+<div class="login-page">
+  <div class="login-card">
+    <div class="brand">Lab<span style="color:#0f766e">Stock</span></div>
+    <p class="lead">Inventory for small diagnostic labs — stock, expiry, and reorder in one place.</p>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        {{ form.non_field_errors }}
+      {% endif %}
+      <label>Username
+        {{ form.username }}
+      </label>
+      <label>Password
+        {{ form.password }}
+      </label>
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+    <div class="login-hint">
+      Demo: <strong>storekeeper</strong> / <strong>labstockdemo</strong><br>
+      Also: admin / labstockdemo, tech / labstockdemo
+    </div>
+  </div>
+</div>
+{% endblock %}

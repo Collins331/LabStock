@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Adjust stock · LabStock{% endblock %}
+{% block page_title %}Stock adjustment{% endblock %}
+{% block page_meta %}<div class="meta">Corrections are new ledger rows — history stays traceable.</div>{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="body">
+    <form method="post" class="form-grid wide">
+      {% csrf_token %}
+      <div>
+        <div style="font-weight:600;margin-bottom:.35rem">Target</div>
+        <div class="radio-row">{{ form.source_type }}</div>
+      </div>
+      <label>Sealed lot {{ form.lot }}{{ form.lot.errors }}</label>
+      <label>Opened container {{ form.opened_container }}{{ form.opened_container.errors }}</label>
+      <label>
+        Quantity change
+        {{ form.quantity_delta }}
+        <span class="help">{{ form.quantity_delta.help_text }}</span>
+        {{ form.quantity_delta.errors }}
+      </label>
+      <label>Reason {{ form.reason }}{{ form.reason.errors }}</label>
+      <label>Notes {{ form.notes }}</label>
+      <div class="btn-row">
+        <button class="btn" type="submit">Post adjustment</button>
+        <a class="btn secondary" href="{% url 'movement_list' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

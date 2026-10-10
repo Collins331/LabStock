@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Settings · LabStock{% endblock %}
+{% block page_title %}Settings &amp; access{% endblock %}
+{% block page_meta %}<div class="meta">Roles, tenant switch, expiry warning window, and recent audit activity.</div>{% endblock %}
+{% block content %}
+<div class="grid two">
+  <section class="panel">
+    <header><h2>{{ current_organization.name }}</h2></header>
+    <div class="body">
+      <form method="post" class="form-grid">
+        {% csrf_token %}
+        <label>
+          Expiry warning days
+          <input class="input" type="number" min="1" name="expiry_warning_days" value="{{ current_organization.expiry_warning_days }}">
+        </label>
+        {% if current_membership.can_manage %}
+        <button class="btn" type="submit">Save</button>
+        {% else %}
+        <p class="muted">Only admin / storekeeper can change settings.</p>
+        {% endif %}
+      </form>
+      {% if user_memberships|length > 1 %}
+      <div style="margin-top:1.25rem">
+        <h3 style="margin:0 0 .5rem;font-size:1rem">Switch organization</h3>
+        <div class="stack-sm">
+          {% for m in user_memberships %}
+          <div>
+            {% if m.organization_id == current_organization.id %}
+              <strong>{{ m.organization.name }}</strong> (current)
+            {% else %}
+              <a href="{% url 'switch_org' m.organization_id %}">{{ m.organization.name }}</a>
+            {% endif %}
+            · {{ m.get_role_display }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  <section class="panel">
+    <header><h2>Staff roles</h2></header>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>User</th><th>Role</th><th>Active</th></tr></thead>
+        <tbody>
+          {% for m in memberships %}
+          <tr>
+            <td>{{ m.user.get_full_name|default:m.user.username }}</td>
+            <td><span class="badge accent">{{ m.get_role_display }}</span></td>
+            <td>{% if m.is_active %}Yes{% else %}No{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+<section class="panel" style="margin-top:1rem">
+  <header><h2>Audit visibility (recent ledger)</h2></header>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>When</th><th>Type</th><th>Item</th><th>Qty</th><th>Reason</th><th>By</th></tr></thead>
+      <tbody>
+        {% for m in recent_audit %}
+        <tr>
+          <td>{{ m.occurred_at|date:"Y-m-d H:i" }}</td>
+          <td>{{ m.get_movement_type_display }}</td>
+          <td>{{ m.item.name }}</td>
+          <td>{% if m.quantity > 0 %}+{% endif %}{{ m.quantity }}</td>
+          <td>{{ m.reason }}</td>
+          <td>{{ m.performed_by|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="empty">No audit rows.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

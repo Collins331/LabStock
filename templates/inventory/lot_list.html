@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Lots · LabStock{% endblock %}
+{% block page_title %}Lots{% endblock %}
+{% block page_meta %}<div class="meta">Sealed stock by lot, location, and manufacturer expiry.</div>{% endblock %}
+{% block top_actions %}
+  <a class="btn" href="{% url 'receive' %}">Receive stock</a>
+{% endblock %}
+{% block content %}
+<div class="filters">
+  <a class="btn {% if show == 'active' %}{% else %}secondary{% endif %}" href="?show=active">Active</a>
+  <a class="btn {% if show == 'all' %}{% else %}secondary{% endif %}" href="?show=all">All</a>
+</div>
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Item</th><th>Lot</th><th>Location</th><th>Qty</th><th>Mfr expiry</th><th>Received</th></tr>
+      </thead>
+      <tbody>
+        {% for lot in lots %}
+        <tr>
+          <td><a href="{% url 'item_detail' lot.item_id %}">{{ lot.item.name }}</a></td>
+          <td>{{ lot.lot_number }}</td>
+          <td>{{ lot.location }}</td>
+          <td>{{ lot.quantity_on_hand }} {{ lot.item.unit }}</td>
+          <td>
+            {{ lot.manufacturer_expiry }}
+            {% if lot.manufacturer_expiry < today %}
+              <span class="badge danger">expired</span>
+            {% elif lot.days_until_expiry <= current_organization.expiry_warning_days %}
+              <span class="badge warn">{{ lot.days_until_expiry }}d</span>
+            {% endif %}
+          </td>
+          <td>{{ lot.received_at }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="empty">No lots.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
