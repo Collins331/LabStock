@@ -17,12 +17,12 @@ SECRET_KEY = os.environ.get(
     "django-insecure-labstock-demo-only-change-me",
 )
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
 
-ALLOWED_HOSTS = [
-    h.strip()
-    for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",")
-    if h.strip()
+ALLOWED_HOSTS = [ '*'
+    # h.strip()
+    # for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",")
+    # if h.strip()
 ]
 
 INSTALLED_APPS = [
